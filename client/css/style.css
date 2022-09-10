@@ -1,0 +1,42 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+h4 {
+    margin-top: 0px;
+}
+
+.card {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    grid-template-columns: auto auto;
+    margin: 5px;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+.sub-card {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+}
+
+.title {
+    font-size: 2em;
+    text-align: center;
+    color: blue;
+}
+
+.authors {
+    font-size: 1.5em;
+    text-align: center;
+    color: blue;
+}
+
+.price {
+    font-size: 1.5em;
+}
