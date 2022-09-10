@@ -8,12 +8,16 @@ h4 {
     margin-top: 0px;
 }
 
+body {
+    margin: 0px;
+}
+
 .card {
     display: grid;
-    width: 100%;
+    width: 100vw;
     gap: 10px;
     grid-template-columns: auto auto;
-    margin: 5px;
+    margin: 0px;
     padding: 20px;
     border: 1px solid black;
 }
