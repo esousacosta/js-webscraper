@@ -15,6 +15,7 @@ h4 {
 body {
     margin: 0px;
     text-align: center;
+    font-family: 'JetBrains Mono', sans-serif;
 }
 
 .library-input {
@@ -26,10 +27,12 @@ body {
     width: 95vw;
     gap: 10px;
     grid-template-columns: auto minmax(30%, 80%);
+    grid-template-rows: 315px auto;
     justify-items: center;
     margin: 0px;
     padding: 20px;
     border: 1px solid black;
+    background-color: bisque;
 }
 
 .card > img {
@@ -47,7 +50,7 @@ body {
 .title {
     font-size: 2em;
     text-align: center;
-    color: blue;
+    color: black;
 }
 
 .library {
@@ -64,4 +67,6 @@ body {
 
 .price {
     font-size: 1.5em;
+    font-weight: 900;
+    background-color: lightgrey;
 }
