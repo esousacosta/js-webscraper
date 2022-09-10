@@ -25,7 +25,7 @@ app.post('/libraries', async (req, res) =>
 {
     console.log(req.body);
     const aBookData = await scrapers.scrapeLibrary(req.body.aLibraryUrl);
-    const aBooks = await dbManager.insertBookInDb(aBookData[0], aBookData[3], aBookData[1], aBookData[2]);
+    const aBooks = await dbManager.insertBookInDb(aBookData[0], aBookData[1], aBookData[2], aBookData[3], aBookData[4]);
     res.send(aBooks);
 })
 

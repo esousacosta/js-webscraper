@@ -2,10 +2,11 @@ const { connect } = require('puppeteer');
 const typeorm = require('typeorm');
 
 class Book {
-    constructor(iId, iTitle, iAuthors, iPrice, iImgUrl) {
+    constructor(iId, iTitle, iAuthors, iLibrary, iPrice, iImgUrl) {
         this.id = iId;
         this.title = iTitle;
         this.authors = iAuthors;
+        this.library = iLibrary;
         this.price = iPrice;
         this.imgUrl = iImgUrl;
     }
@@ -27,6 +28,9 @@ const BookSchema = new EntitySchema(
                 type: "varchar",
             },
             authors: {
+                type: "text"
+            },
+            library: {
                 type: "text"
             },
             price: {
@@ -66,13 +70,14 @@ async function getAllBooksInDb()
     return aBooks;
 }
 
-async function insertBookInDb(iTitle, iAuthors, iPrice, iImgUrl)
+async function insertBookInDb(iTitle, iLibrary, iPrice, iImgUrl, iAuthors)
 {
     const aConnection = await getConnectionToDb();
 
     const aBook = new Book();
     aBook.title = iTitle;
     aBook.authors = iAuthors;
+    aBook.library = iLibrary;
     aBook.price = iPrice;
     aBook.imgUrl = iImgUrl;
     

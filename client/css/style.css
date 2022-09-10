@@ -4,26 +4,41 @@
     align-items: flex-start;
 }
 
+h1 {
+    margin: 0px;
+}
+
 h4 {
-    margin-top: 0px;
+    margin: 0px;
 }
 
 body {
     margin: 0px;
+    text-align: center;
+}
+
+.library-input {
+    margin-bottom: 10px;
 }
 
 .card {
     display: grid;
-    width: 100vw;
+    width: 95vw;
     gap: 10px;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto minmax(30%, 80%);
+    justify-items: center;
     margin: 0px;
     padding: 20px;
     border: 1px solid black;
 }
 
+.card > img {
+    width: 200px;
+}
+
 .sub-card {
     display: grid;
+    max-width: 80%;
     grid-template-rows: 1fr 1fr 1fr;
     justify-items: center;
     align-items: center;
@@ -35,8 +50,14 @@ body {
     color: blue;
 }
 
-.authors {
+.library {
     font-size: 1.5em;
+    text-align: center;
+    color: blue;
+}
+
+.authors {
+    font-size: 1.2em;
     text-align: center;
     color: blue;
 }

@@ -41,12 +41,13 @@ async function loadLibraries()
         const aNewCard = createNewElement('div', { class: 'card' });
         const aInfoSubCard = createNewElement('div', { class: 'sub-card'});
         const aTitle = createNewElement('div', { class: 'title', innerText: aBook.title });
+        const aLibrary = createNewElement('div', { class: 'library', innerText: aBook.library });
         const aAuthors = createNewElement('div', { class: 'authors', innerText: aBook.authors });
-        const aPrice = createNewElement('div', { class: 'price', innerText: "Preço: R$ " + aBook.price });
+        const aPrice = createNewElement('div', { class: 'price', innerText: "R$ " + aBook.price });
         const aImg = createNewElement('img', { src: aBook.imgUrl });
-        aImg.style.width = '200px';
         aNewCard.appendChild(aImg);
         aInfoSubCard.appendChild(aTitle);
+        aInfoSubCard.appendChild(aLibrary);
         aInfoSubCard.appendChild(aAuthors);
         aInfoSubCard.appendChild(aPrice);
         aNewCard.appendChild(aInfoSubCard);
