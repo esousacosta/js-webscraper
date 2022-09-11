@@ -13,7 +13,7 @@ async function fetchElementInfo(iPage, iElementXpath, iProperty)
     return aElementPropertyText;
 }
 
-async function fetchParentElementInfo(iPage, iElementSelector)
+async function fetchChildElementsInfo(iPage, iElementSelector)
 {
     const aChildrenTextContents = await iPage.evaluate((iElementSelector) => {
         const aFilhos = Array.from(document.querySelectorAll(iElementSelector));
@@ -28,14 +28,13 @@ async function fetchParentElementInfo(iPage, iElementSelector)
         });
     }, iElementSelector);
     
-    console.log(aChildrenTextContents);
-
     return aChildrenTextContents;
 }
 
-async function openFoundBookWebpage(iPage, iElementSelector)
+async function fetchInfoFromFoundBookPage(iPage, iElementSelector)
 {
-// '#column-right > div.product-list.extended'
+    try
+    {
     const aFoundBookUrl = await iPage.evaluate((iElementSelector) =>
     {
         const aProductsSection = Array.from(document.querySelectorAll(iElementSelector));
@@ -49,6 +48,12 @@ async function openFoundBookWebpage(iPage, iElementSelector)
     await iPage.goto(aFoundBookUrl);
 
     return await scrapeElementsFromPage(iPage);
+    }
+    catch (iError)
+    {
+        console.log("Couldn't find the requested book!");
+        return undefined;
+    }
 }
 
 async function scrapeElementsFromPage(iPage)
@@ -58,7 +63,7 @@ async function scrapeElementsFromPage(iPage)
         fetchElementInfo(iPage, kLibraryXpath, 'title'),
         fetchElementInfo(iPage, kBookPriceXpath, 'textContent'),
         fetchElementInfo(iPage, kBookCoverXpath, 'src'),
-        fetchParentElementInfo(iPage, kAuthorsSelector)]);
+        fetchChildElementsInfo(iPage, kAuthorsSelector)]);
     
     aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
     return aResults;
@@ -71,15 +76,6 @@ async function scrapeLibrary(iUrl)
     await aPage.goto(iUrl);
 
     const aResults = scrapeElementsFromPage(aPage);
-
-    // const aResults = await Promise.all(
-    //     [fetchElementInfo(aPage, kBookTitleXpath, 'textContent'),
-    //     fetchElementInfo(aPage, kLibraryXpath, 'title'),
-    //     fetchElementInfo(aPage, kBookPriceXpath, 'textContent'),
-    //     fetchElementInfo(aPage, kBookCoverXpath, 'src'),
-    //     fetchParentElementInfo(aPage, kAuthorsSelector)]);
-    
-    // aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
 
     await aBrowser.close();
     
@@ -99,13 +95,21 @@ async function performBookMetaSearch(iBookName)
         aPage.click('#doSearch'),
     ]);
 
-    const aResults = await openFoundBookWebpage(aPage, '#column-right > div.product-list.extended');
+    try
+    {
+        const aResults = await fetchInfoFromFoundBookPage(aPage, '#column-right > div.product-list.extended');
+        console.log("Here are the results of the request: ", (aResults ? aResults : "Nothing found!"));
+
+        await aBrowser.close();
+
+        return aResults;
+    }
+    catch (iError)
+    {
+        console.error(iError);
+        return undefined;
+    }
     
-    console.log(aResults);
-    
-    await aBrowser.close();
-    
-    return aResults;
 }
 
 module.exports = {

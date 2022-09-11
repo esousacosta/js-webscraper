@@ -33,8 +33,14 @@ app.post('/metasearch', async (req, res) =>
 {
     console.log(req.body);
     const aBookData = await scrapers.performBookMetaSearch(req.body.aBookName);
+    if (!aBookData)
+    {
+        res.send("Couldn't find the book in question: " + req.body.aBookName);
+        return;
+    }
     const aBooks = await dbManager.insertBookInDb(aBookData[0], aBookData[1], aBookData[2], aBookData[3], aBookData[4]);
     res.send(aBooks);
+
 });
 
 app.listen(port, () =>
