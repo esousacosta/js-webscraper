@@ -11,6 +11,18 @@ function submitLibrary()
     // send to server;
 }
 
+function submitMetaSearch()
+{
+    const aBookName = document.querySelector('.book-name-input').value;
+    fetch('http://localhost:3000/metasearch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ aBookName })
+    });
+}
+
 function createNewElement(iType, iAttrs = {})
 {
     const aNewElement = document.createElement(iType);

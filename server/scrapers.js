@@ -33,20 +33,53 @@ async function fetchParentElementInfo(iPage, iElementSelector)
     return aChildrenTextContents;
 }
 
+async function openFoundBookWebpage(iPage, iElementSelector)
+{
+// '#column-right > div.product-list.extended'
+    const aFoundBookUrl = await iPage.evaluate((iElementSelector) =>
+    {
+        const aProductsSection = Array.from(document.querySelectorAll(iElementSelector));
+        if (aProductsSection.length === 0)
+        {
+            return [];
+        }
+        return aFirstFoundBookUrl = aProductsSection[0].querySelector('div > div > a').href;
+    }, iElementSelector); 
+
+    await iPage.goto(aFoundBookUrl);
+
+    return await scrapeElementsFromPage(iPage);
+}
+
+async function scrapeElementsFromPage(iPage)
+{
+    const aResults = await Promise.all(
+        [fetchElementInfo(iPage, kBookTitleXpath, 'textContent'),
+        fetchElementInfo(iPage, kLibraryXpath, 'title'),
+        fetchElementInfo(iPage, kBookPriceXpath, 'textContent'),
+        fetchElementInfo(iPage, kBookCoverXpath, 'src'),
+        fetchParentElementInfo(iPage, kAuthorsSelector)]);
+    
+    aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
+    return aResults;
+}
+
 async function scrapeLibrary(iUrl)
 {
     const aBrowser = await puppeteer.launch();
     const aPage = await aBrowser.newPage();
     await aPage.goto(iUrl);
 
-    const aResults = await Promise.all(
-        [fetchElementInfo(aPage, kBookTitleXpath, 'textContent'),
-        fetchElementInfo(aPage, kLibraryXpath, 'title'),
-        fetchElementInfo(aPage, kBookPriceXpath, 'textContent'),
-        fetchElementInfo(aPage, kBookCoverXpath, 'src'),
-        fetchParentElementInfo(aPage, kAuthorsSelector)]);
+    const aResults = scrapeElementsFromPage(aPage);
+
+    // const aResults = await Promise.all(
+    //     [fetchElementInfo(aPage, kBookTitleXpath, 'textContent'),
+    //     fetchElementInfo(aPage, kLibraryXpath, 'title'),
+    //     fetchElementInfo(aPage, kBookPriceXpath, 'textContent'),
+    //     fetchElementInfo(aPage, kBookCoverXpath, 'src'),
+    //     fetchParentElementInfo(aPage, kAuthorsSelector)]);
     
-    aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
+    // aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
 
     await aBrowser.close();
     
@@ -55,6 +88,27 @@ async function scrapeLibrary(iUrl)
     return aResults;
 }
 
+async function performBookMetaSearch(iBookName)
+{
+    const aBrowser = await puppeteer.launch({headless: true});
+    const aPage = await aBrowser.newPage();
+    await aPage.goto('https://livrariabsm.com.br/');
+    await aPage.type('#input-search', iBookName);
+    await Promise.all([
+        aPage.waitForNavigation(),
+        aPage.click('#doSearch'),
+    ]);
+
+    const aResults = await openFoundBookWebpage(aPage, '#column-right > div.product-list.extended');
+    
+    console.log(aResults);
+    
+    await aBrowser.close();
+    
+    return aResults;
+}
+
 module.exports = {
-    scrapeLibrary
+    scrapeLibrary,
+    performBookMetaSearch
 }

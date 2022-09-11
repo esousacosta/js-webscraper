@@ -19,7 +19,7 @@ app.get('/libraries', async (req, res) =>
     const aBooks = await dbManager.getAllBooksInDb();
     // TODO: GET from DB
     res.send(aBooks);
-})
+});
 
 app.post('/libraries', async (req, res) =>
 {
@@ -27,7 +27,15 @@ app.post('/libraries', async (req, res) =>
     const aBookData = await scrapers.scrapeLibrary(req.body.aLibraryUrl);
     const aBooks = await dbManager.insertBookInDb(aBookData[0], aBookData[1], aBookData[2], aBookData[3], aBookData[4]);
     res.send(aBooks);
-})
+});
+
+app.post('/metasearch', async (req, res) =>
+{
+    console.log(req.body);
+    const aBookData = await scrapers.performBookMetaSearch(req.body.aBookName);
+    const aBooks = await dbManager.insertBookInDb(aBookData[0], aBookData[1], aBookData[2], aBookData[3], aBookData[4]);
+    res.send(aBooks);
+});
 
 app.listen(port, () =>
 {
