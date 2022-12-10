@@ -50,7 +50,7 @@ async function getConnectionToDb() {
             host: "localhost",
             port: 3306,
             username: "root",
-            password: "root",
+            password: "password",
             database: "libraryscrapers",
             synchronize: true,
             logging: false,
