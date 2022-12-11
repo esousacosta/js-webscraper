@@ -1,10 +1,16 @@
 const puppeteer = require("puppeteer");
+const dbManager = require("./db");
 const kBookTitleXpath = '//*[@id="content"]/div/div[2]/div[2]/div[3]/span';
 const kLibraryXpath = '//*[@id="logo"]/a';
 const kBookCoverXpath = '//*[@id="image"]/img';
 const kAuthorsSelector =
   "#content > div > div.main-panel > div.painel-lateral > div.author a";
 const kBookPriceXpath = '//*[@id="content"]/div/div[2]/div[2]/div[6]/span[4]';
+const kSecondaryBookPriceXpath =
+  '//*[@id="content"]/div/div[2]/div[2]/div[6]/span[3]';
+
+const kBsmHomeLink = "https://livrariabsm.com.br/";
+const kSensoIncomumHomeLink = "https://livraria.sensoincomum.org/";
 
 async function fetchElementInfo(iPage, iElementXpath, iProperty) {
   const [aElement] = await iPage.$x(iElementXpath);
@@ -66,15 +72,38 @@ async function scrapeElementsFromPage(iPage) {
   try {
     console.log("Beginning the scrapping of elements from the page...");
     const aResults = await Promise.all([
-      fetchElementInfo(iPage, kBookTitleXpath, "textContent"),
-      fetchElementInfo(iPage, kLibraryXpath, "title"),
-      fetchElementInfo(iPage, kBookPriceXpath, "textContent"),
-      fetchElementInfo(iPage, kBookCoverXpath, "src"),
-      fetchChildElementsInfo(iPage, kAuthorsSelector),
+      fetchElementInfo(iPage, kBookTitleXpath, "textContent").catch((e) =>
+        console.log(`ERROR - Title not found: ${e}`)
+      ),
+      fetchElementInfo(iPage, kLibraryXpath, "title").catch((e) =>
+        console.log(`ERROR - Library not found: ${e}`)
+      ),
+      fetchElementInfo(iPage, kBookPriceXpath, "textContent").catch((e) => {
+        console.log(`ERROR - Price not found: ${e}`);
+        return fetchElementInfo(iPage, kSecondaryBookPriceXpath, "textContent");
+      }),
+      fetchElementInfo(iPage, kBookCoverXpath, "src").catch((e) =>
+        console.log(`ERROR - Book cover not found: ${e}`)
+      ),
+      fetchChildElementsInfo(iPage, kAuthorsSelector).catch((e) =>
+        console.log(`ERROR - Authors not found: ${e}`)
+      ),
     ]);
 
-    aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
-    return aResults;
+    if (aResults) {
+      aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
+      const aBookResult = new dbManager.Book(
+        null,
+        aResults[0],
+        aResults[4],
+        aResults[1],
+        aResults[2],
+        aResults[3]
+      );
+      return aBookResult;
+    } else {
+      return undefined;
+    }
   } catch (e) {
     console.log(`ERROR - Caught exception: ${e}`);
   }
@@ -94,11 +123,41 @@ async function scrapeLibrary(iUrl) {
   return aResults;
 }
 
-async function performBookMetaSearch(iBookName) {
+async function performBookMetaSearchOnBsm(iBookName) {
   const aBrowser = await puppeteer.launch({ headless: true });
   const aPage = await aBrowser.newPage();
-  // await aPage.goto("https://livraria.sensoincomum.org/");
-  await aPage.goto("https://livrariabsm.com.br/");
+  await aPage.goto(kBsmHomeLink);
+  await aPage.type("#input-search", iBookName);
+  try {
+    await Promise.all([aPage.waitForNavigation(), aPage.click("#doSearch")]);
+  } catch (e) {
+    console.log(`Caught navigation-search exception: ${e}`);
+    return undefined;
+  }
+
+  try {
+    const aResults = await fetchInfoFromFoundBookPage(
+      aPage,
+      "#column-right > div.product-list.extended"
+    );
+    console.log(
+      "Here are the results of the request: ",
+      aResults ? aResults : "Nothing found!"
+    );
+
+    await aBrowser.close();
+
+    return aResults;
+  } catch (iError) {
+    console.error(iError);
+    return undefined;
+  }
+}
+
+async function performBookMetaSearchOnSenso(iBookName) {
+  const aBrowser = await puppeteer.launch({ headless: true });
+  const aPage = await aBrowser.newPage();
+  await aPage.goto(kSensoIncomumHomeLink);
   await aPage.type("#input-search", iBookName);
   try {
     await Promise.all([aPage.waitForNavigation(), aPage.click("#doSearch")]);
@@ -128,5 +187,6 @@ async function performBookMetaSearch(iBookName) {
 
 module.exports = {
   scrapeLibrary,
-  performBookMetaSearch,
+  performBookMetaSearchOnBsm,
+  performBookMetaSearchOnSenso,
 };
