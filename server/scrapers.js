@@ -14,18 +14,30 @@ async function fetchElementInfo(iPage, iElementXpath, iProperty) {
 }
 
 async function fetchChildElementsInfo(iPage, iElementSelector) {
-  const aChildrenTextContents = await iPage.evaluate((iElementSelector) => {
-    const aFilhos = Array.from(document.querySelectorAll(iElementSelector));
-    if (aFilhos.length === 1) {
-      return aFilhos[0].innerHTML;
-    }
+  console.log("Fetching child elements info - author");
+  try {
+    const aChildrenTextContents = await iPage.evaluate((iElementSelector) => {
+      const aFilhos = Array.from(document.querySelectorAll(iElementSelector));
 
-    return aFilhos.reduce(function (iPreviousAuthor, iCurrentAuthor) {
-      return iPreviousAuthor.innerHTML + ", " + iCurrentAuthor.innerHTML;
-    });
-  }, iElementSelector);
+      if (!aFilhos.length) {
+        console.log("No authors found!");
+        return aFilhos;
+      }
 
-  return aChildrenTextContents;
+      if (aFilhos.length === 1) {
+        console.log("Found a single author!");
+        return aFilhos[0].innerHTML;
+      }
+
+      return aFilhos.reduce(function (iPreviousAuthor, iCurrentAuthor) {
+        return iPreviousAuthor.innerHTML + ", " + iCurrentAuthor.innerHTML;
+      });
+    }, iElementSelector);
+
+    return aChildrenTextContents;
+  } catch (e) {
+    console.log(`ERROR - Caught exception: ${e}`);
+  }
 }
 
 async function fetchInfoFromFoundBookPage(iPage, iElementSelector) {
@@ -45,13 +57,14 @@ async function fetchInfoFromFoundBookPage(iPage, iElementSelector) {
 
     return await scrapeElementsFromPage(iPage);
   } catch (iError) {
-    console.log("Couldn't find the requested book!");
+    console.log(`ERROR - Couldn't find the requested book: ${iError}`);
     return undefined;
   }
 }
 
 async function scrapeElementsFromPage(iPage) {
   try {
+    console.log("Beginning the scrapping of elements from the page...");
     const aResults = await Promise.all([
       fetchElementInfo(iPage, kBookTitleXpath, "textContent"),
       fetchElementInfo(iPage, kLibraryXpath, "title"),
@@ -59,12 +72,12 @@ async function scrapeElementsFromPage(iPage) {
       fetchElementInfo(iPage, kBookCoverXpath, "src"),
       fetchChildElementsInfo(iPage, kAuthorsSelector),
     ]);
-  } catch (e) {
-    console.log(`Caught exception: ${e}`);
-  }
 
-  aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
-  return aResults;
+    aResults[0] = aResults[0].replace(/\n|\r|\t/g, "");
+    return aResults;
+  } catch (e) {
+    console.log(`ERROR - Caught exception: ${e}`);
+  }
 }
 
 async function scrapeLibrary(iUrl) {
@@ -84,6 +97,7 @@ async function scrapeLibrary(iUrl) {
 async function performBookMetaSearch(iBookName) {
   const aBrowser = await puppeteer.launch({ headless: true });
   const aPage = await aBrowser.newPage();
+  // await aPage.goto("https://livraria.sensoincomum.org/");
   await aPage.goto("https://livrariabsm.com.br/");
   await aPage.type("#input-search", iBookName);
   try {
