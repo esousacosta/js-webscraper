@@ -1,3 +1,8 @@
+const kBsmHomeLink = "https://livrariabsm.com.br/";
+const kSensoIncomumHomeLink = "https://livraria.sensoincomum.org/";
+const kPhVoxHomeLink = "https://livrariaphvox.com.br/";
+const kComunicacaoEPoliticaHomeLink = "https://livrariacep.com.br/";
+
 const scrapers = require("./scrapers");
 const dbManager = require("./db");
 const express = require("express");
@@ -34,39 +39,39 @@ app.post("/libraries", async (req, res) => {
 
 app.post("/metasearch", async (req, res) => {
   console.log(req.body);
-  const aBsmBookData = await scrapers.performBookMetaSearchOnBsm(
-    req.body.aBookName
-  );
-  const aSensoBookData = await scrapers.performBookMetaSearchOnSenso(
-    req.body.aBookName
+  const aBsmBookData = await scrapers.performBookMetaSearch(
+    req.body.aBookName,
+    kBsmHomeLink
   );
 
-  if (!aBsmBookData || !aSensoBookData) {
+  const aSensoBookData = await scrapers.performBookMetaSearch(
+    req.body.aBookName,
+    kSensoIncomumHomeLink
+  );
+
+  const aPhVoxBookData = await scrapers.performBookMetaSearch(
+    req.body.aBookName,
+    kPhVoxHomeLink
+  );
+
+  const aCePBookData = await scrapers.performBookMetaSearch(
+    req.body.aBookName,
+    kComunicacaoEPoliticaHomeLink
+  );
+
+  if (!aBsmBookData || !aSensoBookData || !aPhVoxBookData || !aCePBookData) {
     res.send("Couldn't find the book in question: " + req.body.aBookName);
     return;
   }
 
-  console.log(`Senso's data: ${aSensoBookData}`);
-  console.log(`BSM's data: ${aBsmBookData}`);
-
-  const aFoundBooks = [aBsmBookData, aSensoBookData];
+  const aFoundBooks = [
+    aBsmBookData,
+    aSensoBookData,
+    aPhVoxBookData,
+    aCePBookData,
+  ];
   let aAddedBooks = await dbManager.insertBooksInDb(aFoundBooks);
 
-  //   let aBooks = await dbManager.insertBookInDb(
-  //     aBsmBookData[0],
-  //     aBsmBookData[1],
-  //     aBsmBookData[2],
-  //     aBsmBookData[3],
-  //     aBsmBookData[4]
-  //   );
-
-  //   aBooks = await dbManager.insertBookInDb(
-  //     aSensoBookData[0],
-  //     aSensoBookData[1],
-  //     aSensoBookData[2],
-  //     aSensoBookData[3],
-  //     aSensoBookData[4]
-  //   );
   res.send(aAddedBooks);
 });
 

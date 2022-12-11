@@ -123,41 +123,10 @@ async function scrapeLibrary(iUrl) {
   return aResults;
 }
 
-async function performBookMetaSearchOnBsm(iBookName) {
+async function performBookMetaSearch(iBookName, iLibraryUrl) {
   const aBrowser = await puppeteer.launch({ headless: true });
   const aPage = await aBrowser.newPage();
-  await aPage.goto(kBsmHomeLink);
-  await aPage.type("#input-search", iBookName);
-  try {
-    await Promise.all([aPage.waitForNavigation(), aPage.click("#doSearch")]);
-  } catch (e) {
-    console.log(`Caught navigation-search exception: ${e}`);
-    return undefined;
-  }
-
-  try {
-    const aResults = await fetchInfoFromFoundBookPage(
-      aPage,
-      "#column-right > div.product-list.extended"
-    );
-    console.log(
-      "Here are the results of the request: ",
-      aResults ? aResults : "Nothing found!"
-    );
-
-    await aBrowser.close();
-
-    return aResults;
-  } catch (iError) {
-    console.error(iError);
-    return undefined;
-  }
-}
-
-async function performBookMetaSearchOnSenso(iBookName) {
-  const aBrowser = await puppeteer.launch({ headless: true });
-  const aPage = await aBrowser.newPage();
-  await aPage.goto(kSensoIncomumHomeLink);
+  await aPage.goto(iLibraryUrl);
   await aPage.type("#input-search", iBookName);
   try {
     await Promise.all([aPage.waitForNavigation(), aPage.click("#doSearch")]);
@@ -187,6 +156,5 @@ async function performBookMetaSearchOnSenso(iBookName) {
 
 module.exports = {
   scrapeLibrary,
-  performBookMetaSearchOnBsm,
-  performBookMetaSearchOnSenso,
+  performBookMetaSearch,
 };

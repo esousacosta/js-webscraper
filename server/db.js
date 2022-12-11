@@ -91,23 +91,8 @@ async function insertBooksInDb(iBooksArray) {
   const aBookRepo = aConnection.getRepository(Book);
 
   for (anInputBook of iBooksArray) {
-    // const aBook = new Book(
-    //   null,
-    //   anInputBook[0],
-    //   anInputBook[4],
-    //   anInputBook[1],
-    //   anInputBook[2],
-    //   anInputBook[3]
-    // );
-
-    // const aBookRepo = aConnection.getRepository(Book);
     const aResult = await aBookRepo.save(anInputBook);
     console.log("saved", aResult);
-    // aBook.title = iTitle;
-    // aBook.authors = iAuthors;
-    // aBook.library = iLibrary;
-    // aBook.price = iPrice;
-    // aBook.imgUrl = iImgUrl;
   }
 
   const aListOfAllBooks = await aBookRepo.find();
