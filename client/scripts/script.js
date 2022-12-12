@@ -42,6 +42,8 @@ async function loadLibraries() {
 
   const aDivContainer = document.querySelector(".container");
 
+  aDivContainer.replaceChildren();
+
   aBooks.forEach((aBook) => {
     const aNewCard = createNewElement("div", { class: "card" });
     const aInfoSubCard = createNewElement("div", { class: "sub-card" });
