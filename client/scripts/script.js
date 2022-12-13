@@ -1,70 +1,77 @@
-function submitLibrary()
-{
-    const aLibraryUrl = document.querySelector('.library-input').value;
-    fetch('http://localhost:3000/libraries', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ aLibraryUrl })
-    })
-    // send to server;
+function submitLibrary() {
+  const aLibraryUrl = document.querySelector(".library-input").value;
+  fetch("http://localhost:3000/libraries", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ aLibraryUrl }),
+  });
+  // send to server;
 }
 
-function submitMetaSearch()
-{
-    const aBookName = document.querySelector('.book-name-input').value;
-    fetch('http://localhost:3000/metasearch', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ aBookName })
-    });
+function submitMetaSearch() {
+  const aBookName = document.querySelector(".book-name-input").value;
+  fetch("http://localhost:3000/metasearch", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ aBookName }),
+  })
+    .then((response) => loadLibraries())
+    .catch((e) => console.log(`ERROR - Caught exception at first level: ${e}`));
 }
 
-function createNewElement(iType, iAttrs = {})
-{
-    const aNewElement = document.createElement(iType);
-    for (let aAttr in iAttrs)
-    {
-        const aValue = iAttrs[aAttr];
-        if (aAttr == 'innerText')
-        {
-            aNewElement.innerText = aValue;
-        }
-        else
-        {
-            aNewElement.setAttribute(aAttr, aValue);
-        }
+function createNewElement(iType, iAttrs = {}) {
+  const aNewElement = document.createElement(iType);
+  for (let aAttr in iAttrs) {
+    const aValue = iAttrs[aAttr];
+    if (aAttr == "innerText") {
+      aNewElement.innerText = aValue;
+    } else {
+      aNewElement.setAttribute(aAttr, aValue);
     }
-    return aNewElement;
+  }
+  return aNewElement;
 }
 
-async function loadLibraries()
-{
-    const aReply = await fetch('http://localhost:3000/libraries');
-    const aBooks = await aReply.json();
+async function loadLibraries() {
+  const aReply = await fetch("http://localhost:3000/libraries");
+  const aBooks = await aReply.json();
 
-    const aDivContainer = document.querySelector('.container');
+  const aDivContainer = document.querySelector(".container");
 
-    aBooks.forEach(aBook =>
-    {
-        const aNewCard = createNewElement('div', { class: 'card' });
-        const aInfoSubCard = createNewElement('div', { class: 'sub-card'});
-        const aTitle = createNewElement('div', { class: 'title', innerText: aBook.title });
-        const aLibrary = createNewElement('div', { class: 'library', innerText: aBook.library });
-        const aAuthors = createNewElement('div', { class: 'authors', innerText: aBook.authors });
-        const aPrice = createNewElement('div', { class: 'price', innerText: "R$ " + aBook.price });
-        const aImg = createNewElement('img', { src: aBook.imgUrl });
-        aNewCard.appendChild(aImg);
-        aInfoSubCard.appendChild(aTitle);
-        aInfoSubCard.appendChild(aLibrary);
-        aInfoSubCard.appendChild(aAuthors);
-        aInfoSubCard.appendChild(aPrice);
-        aNewCard.appendChild(aInfoSubCard);
-        aDivContainer.appendChild(aNewCard);
+  aDivContainer.replaceChildren();
+
+  aBooks.forEach((aBook) => {
+    const aNewCard = createNewElement("div", { class: "card" });
+    const aInfoSubCard = createNewElement("div", { class: "sub-card" });
+    const aTitle = createNewElement("div", {
+      class: "title",
+      innerText: aBook.title,
     });
+    const aLibrary = createNewElement("div", {
+      class: "library",
+      innerText: aBook.library,
+    });
+    const aAuthors = createNewElement("div", {
+      class: "authors",
+      innerText: aBook.authors,
+    });
+    const aPrice = createNewElement("div", {
+      class: "price",
+      innerText: "R$ " + aBook.price,
+    });
+    const aImg = createNewElement("img", { src: aBook.imgUrl });
+    aNewCard.appendChild(aImg);
+    aInfoSubCard.appendChild(aTitle);
+    aInfoSubCard.appendChild(aLibrary);
+    aInfoSubCard.appendChild(aAuthors);
+    aInfoSubCard.appendChild(aPrice);
+    aNewCard.appendChild(aInfoSubCard);
+    aDivContainer.appendChild(aNewCard);
+  });
 }
 
 loadLibraries();
